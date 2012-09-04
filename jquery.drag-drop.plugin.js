@@ -151,6 +151,8 @@
                     return false;
                 }
             }
+            event.stopPropagation();
+            return false;
         },
 
         onMove: function(event) {
