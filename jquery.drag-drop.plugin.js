@@ -183,9 +183,9 @@
                 posY = Math.min(Math.max(posY, limits.minY), limits.maxY);
             }
             $activeElement.css({ left: posX, top: posY });
-
+            destElement = options.canDrop(destElement);
             if (destElement) {
-                if ($destElement==null || $destElement.get(0)!=destElement) {
+                if ($destElement==null || !$destElement.is(destElement)) {
                     var $possibleDestElement = $(destElement);
                     if (options.canDrop($possibleDestElement)) {
                         if (options.dropClass) {
