@@ -112,7 +112,11 @@
 
                         // Elements that are cloned and dragged around are added to the parent in order
                         // to get any cascading styles applied.
-                        $activeElement.appendTo($element.parent());
+                        if (options.appendTo) {
+                            $activeElement.appendTo($(options.appendTo))
+                        } else {
+                            $activeElement.appendTo($element.parent());
+                        }
                         if (options.sourceClass)
                             $sourceElement.addClass(options.sourceClass);
                         else if (options.sourceHide)
