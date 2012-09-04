@@ -70,68 +70,86 @@
         },
 
         onStart: function(event) {
-            var $me = $(this);
-            var options = $me.data("options");
-            if (!options.isActive)
-                return;
 
-            var $element = options.canDrag($me, event);
-            if ($element) {
-                $sourceElement = $element;
-                var offset = $sourceElement.offset();
-                var width = $sourceElement.width();
-                var height = $sourceElement.height();
-                if (event.type=="touchstart") {
-                    dragOffsetX = event.originalEvent.touches[0].clientX - offset.left;
-                    dragOffsetY = event.originalEvent.touches[0].clientY - offset.top;
+            var handlers = {
+                'mousemove touchmove': initHandler,
+                'mouseup touchend': die
+            };
+
+            $(this).bind(handlers);
+
+            // Unbind and return if a mouseup occurs before a mousemove
+            function die(){
+                $(this).unbind(handlers);
+            }
+
+            // Initialize draggable if mousemove occurs before mouseup
+            function initHandler(){
+                $(this).unbind(handlers);
+
+                var $me = $(this);
+                var options = $me.data("options");
+                if (!options.isActive)
+                    return;
+
+                var $element = options.canDrag($me, event);
+                if ($element) {
+                    $sourceElement = $element;
+                    var offset = $sourceElement.offset();
+                    var width = $sourceElement.width();
+                    var height = $sourceElement.height();
+                    if (event.type=="touchstart") {
+                        dragOffsetX = event.originalEvent.touches[0].clientX - offset.left;
+                        dragOffsetY = event.originalEvent.touches[0].clientY - offset.top;
+                    }
+                    else {
+                        dragOffsetX = event.pageX - offset.left;
+                        dragOffsetY = event.pageY - offset.top;
+                    }
+
+                    if (options.makeClone) {
+                        $activeElement = $sourceElement.clone(false);
+
+                        // Elements that are cloned and dragged around are added to the parent in order
+                        // to get any cascading styles applied.
+                        $activeElement.appendTo($element.parent());
+                        if (options.sourceClass)
+                            $sourceElement.addClass(options.sourceClass);
+                        else if (options.sourceHide)
+                            $sourceElement.css("visibility", "hidden");
+                    }
+                    else {
+                        $activeElement = $sourceElement;
+                    }
+
+                    $activeElement.css({
+                        position: "absolute",
+                        left: offset.left,
+                        top: offset.top,
+                        width: width,
+                        height: height
+                    });
+                    if (options.dragClass)
+                        $activeElement.addClass(options.dragClass);
+
+                    var $c = options.container;
+                    if ($c) {
+                        var offset = $c.offset();
+                        limits = {
+                            minX: offset.left,
+                            minY: offset.top,
+                            maxX: offset.left + $c.outerWidth() - $element.outerWidth(),
+                            maxY: offset.top + $c.outerHeight() - $element.outerHeight()
+                        };
+                    }
+
+                    $(window)
+                        .bind("mousemove.dragdrop touchmove.dragdrop", { source: $me }, methods.onMove)
+                        .bind("mouseup.dragdrop touchend.dragdrop", { source: $me }, methods.onEnd);
+
+                    event.stopPropagation();
+                    return false;
                 }
-                else {
-                    dragOffsetX = event.pageX - offset.left;
-                    dragOffsetY = event.pageY - offset.top;
-                }
-
-                if (options.makeClone) {
-                    $activeElement = $sourceElement.clone(false);
-
-                    // Elements that are cloned and dragged around are added to the parent in order
-                    // to get any cascading styles applied.
-                    $activeElement.appendTo($element.parent());
-                    if (options.sourceClass)
-                        $sourceElement.addClass(options.sourceClass);
-                    else if (options.sourceHide)
-                        $sourceElement.css("visibility", "hidden");
-                }
-                else {
-                    $activeElement = $sourceElement;
-                }
-
-                $activeElement.css({
-                    position: "absolute",
-                    left: offset.left,
-                    top: offset.top,
-                    width: width,
-                    height: height
-                });
-                if (options.dragClass)
-                    $activeElement.addClass(options.dragClass);
-
-                var $c = options.container;
-                if ($c) {
-                    var offset = $c.offset();
-                    limits = {
-                        minX: offset.left,
-                        minY: offset.top,
-                        maxX: offset.left + $c.outerWidth() - $element.outerWidth(),
-                        maxY: offset.top + $c.outerHeight() - $element.outerHeight()
-                    };
-                }
-
-                $(window)
-                    .bind("mousemove.dragdrop touchmove.dragdrop", { source: $me }, methods.onMove)
-                    .bind("mouseup.dragdrop touchend.dragdrop", { source: $me }, methods.onEnd);
-
-                event.stopPropagation();
-                return false;
             }
         },
 
