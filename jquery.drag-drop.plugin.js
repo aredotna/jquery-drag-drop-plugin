@@ -1,4 +1,16 @@
 (function($) {
+
+    var throttle = function(fn, delay) {
+      var timer = null;
+      return function () {
+        var context = this, args = arguments;
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+          fn.apply(context, args);
+        }, delay);
+      };
+    }
+
     var defaultOptions = {
         makeClone: false,  // Drag a clone of the source, and not the actual source element
         sourceClass: null, // Class to apply to source element when dragging a clone of the source element
@@ -148,7 +160,7 @@
                     }
 
                     $(window)
-                        .bind("mousemove.dragdrop touchmove.dragdrop", { source: $me }, methods.onMove)
+                        .bind("mousemove.dragdrop touchmove.dragdrop", { source: $me }, throttle(methods.onMove, 10))
                         .bind("mouseup.dragdrop touchend.dragdrop", { source: $me }, methods.onEnd);
 
                     event.stopPropagation();
@@ -187,7 +199,7 @@
                 posY = Math.min(Math.max(posY, limits.minY), limits.maxY);
             }
             $activeElement.css({ left: posX, top: posY });
-            destElement = options.canDrop(destElement);
+            destElement = options.canDrop(destElement, event);
             if (destElement) {
                 if ($destElement==null || !$destElement.is(destElement)) {
                     var $possibleDestElement = $(destElement);
