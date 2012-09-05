@@ -203,20 +203,15 @@
             if (destElement) {
                 if ($destElement==null || !$destElement.is(destElement)) {
                     var $possibleDestElement = $(destElement);
-                    if (options.canDrop($possibleDestElement)) {
-                        if (options.dropClass) {
-                            if ($destElement!=null)
-                                $destElement.removeClass(options.dropClass);
-                            $possibleDestElement.addClass(options.dropClass);
-                        }
-                        if (options.canDropClass) {
-                            $activeElement.addClass(options.canDropClass);
-                        }
-                        $destElement = $possibleDestElement;
+                    if (options.dropClass) {
+                        if ($destElement!=null)
+                            $destElement.removeClass(options.dropClass);
+                        $possibleDestElement.addClass(options.dropClass);
                     }
-                    else if ($destElement!=null) {
-                        cancelDestElement(options);
+                    if (options.canDropClass) {
+                        $activeElement.addClass(options.canDropClass);
                     }
+                    $destElement = $possibleDestElement;
                 }
             }
             else if ($destElement!=null) {
